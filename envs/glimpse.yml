@@ -1,0 +1,7 @@
+name: glimpse
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  glimpse=1.1.1  bcftools=1.20

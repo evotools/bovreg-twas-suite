@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "bovreg-twas-preprocess",
+  "description": "Preprocessing pipeline to prepare input data for TWAS, including trimming, alignment, quantification, imputation, and covariate inference.",
+  "type": "object",
+  "properties": {
+    "fasta": {
+      "type": "string",
+      "description": "Reference genome FASTA file",
+      "format": "file"
+    },
+    "gtf": {
+      "type": "string",
+      "description": "Gene annotation in GTF format",
+      "format": "file"
+    },
+    "input_sheet": {
+      "type": "string",
+      "description": "Sample metadata sheet (CSV or TSV format)",
+      "format": "file"
+    },
+    "panel_vcf": {
+      "type": "string",
+      "description": "Reference panel VCF file for GLIMPSE",
+      "format": "file"
+    },
+    "map_file": {
+      "type": "string",
+      "description": "Genetic map file used for GLIMPSE phasing",
+      "format": "file"
+    },
+    "peer_k": {
+      "type": "integer",
+      "description": "Number of PEER factors to estimate",
+      "default": 20
+    }
+  },
+  "required": ["fasta", "gtf", "input_sheet", "panel_vcf", "map_file"]
+}
+
