@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 process multiqc {
   input:
-    path("*.zip")
+    path(qc_files)
   output:
     path("multiqc_report.html"), emit: report
   script:

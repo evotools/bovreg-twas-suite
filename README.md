@@ -33,6 +33,7 @@ Ensure you have:
 
 Runs:
 - `trim_galore`, `fastqc`, `star`, `featureCounts`, `kallisto`
+- automatic `MultiQC` aggregation of FastQC and STAR logs
 - `GLIMPSE` phasing and imputation
 - PEER factor estimation
 
@@ -48,6 +49,9 @@ nextflow run workflows/bovreg-twas-preprocess \
 ```
 
 > Use `-stub-run` to validate structure.
+
+Expected QC output:
+- `results/multiqc/multiqc_report.html`
 
 ---
 

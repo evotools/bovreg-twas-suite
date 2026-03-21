@@ -4,6 +4,7 @@ process star_align {
     tuple val(sample_id), path(fq1), path(fq2), path(star_index)
   output:
     path("${sample_id}.bam"), emit: bam
+    path("${sample_id}_Log.final.out"), emit: star_logs
   script:
     """
     STAR --genomeDir $star_index --readFilesIn $fq1 $fq2 \
