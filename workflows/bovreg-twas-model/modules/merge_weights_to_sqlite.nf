@@ -1,6 +1,6 @@
 process merge_weights_to_sqlite {
   input:
-    path(weights), path(model_summaries), path(sample_info)
+    path(weights_files), path(model_summary_files), path(sample_info)
   output:
     path("weights.db"), emit: db
   script:
@@ -8,9 +8,13 @@ process merge_weights_to_sqlite {
     Rscript -e '
       library(RSQLite); library(dplyr)
       con <- dbConnect(SQLite(), "weights.db")
-      w <- read.table("$weights", header=TRUE)
-      m <- read.table("$model_summaries", header=TRUE)
-      s <- read.table("$sample_info", header=TRUE)
+      read_many <- function(files) {
+        dfs <- lapply(files, function(f) read.table(f, header=TRUE, sep="\\t", stringsAsFactors=FALSE, check.names=FALSE))
+        bind_rows(dfs)
+      }
+      w <- read_many(strsplit("$weights_files", " ")[[1]])
+      m <- read_many(strsplit("$model_summary_files", " ")[[1]])
+      s <- read.table("$sample_info", header=TRUE, sep="\\t", stringsAsFactors=FALSE, check.names=FALSE)
       dbWriteTable(con, "weights", w)
       dbWriteTable(con, "model_summaries", m)
       dbWriteTable(con, "sample_info", s)

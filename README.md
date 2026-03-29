@@ -63,18 +63,26 @@ Runs:
 - Covariance matrix computation
 - Merging results into SQLite
 - Running `S-PrediXcan`
+- Genome-wide TWAS Manhattan plots (one per trait result file)
 
 #### Run example:
 ```bash
 nextflow run workflows/bovreg-twas-model \
   --gwas_snps gwas_snps.txt \
+  --gwas_vcf gwas.vcf.gz \
   --gtf annotation.gtf \
   --genotype_file genotypes.txt \
   --expression_file expression.txt \
   --covariates_file covariates.txt \
   --snp_annot_file snp_annot.txt \
+  --gwas_sumstats_glob "sumstats/*.tsv" \
   -profile conda
 ```
+
+Expected model plotting outputs:
+- `results_model/s_predixcan/s_predixcan_results_<trait>.tsv`
+- `results_model/twas_plots/twas_manhattan_<trait>.png`
+- `results_model/twas_plots/twas_plot_manifest_<trait>.tsv`
 
 ---
 

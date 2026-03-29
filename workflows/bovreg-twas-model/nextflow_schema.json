@@ -9,6 +9,11 @@
       "description": "List of GWAS SNPs to filter the VCF",
       "format": "file"
     },
+    "gwas_vcf": {
+      "type": "string",
+      "description": "GWAS/reference VCF file to subset with gwas_snps",
+      "format": "file"
+    },
     "gtf": {
       "type": "string",
       "description": "Gene annotation GTF file used for parsing gene coordinates",
@@ -34,6 +39,30 @@
       "description": "SNP annotation file with rsID, varID, ref/alt alleles",
       "format": "file"
     },
+    "gwas_sumstats_file": {
+      "type": "string",
+      "description": "Single GWAS/TWAS summary file for S-PrediXcan normalization",
+      "format": "file"
+    },
+    "gwas_sumstats_files": {
+      "type": "array",
+      "description": "Multiple GWAS/TWAS summary files (one plot per trait)",
+      "items": { "type": "string" }
+    },
+    "gwas_sumstats_glob": {
+      "type": "string",
+      "description": "Glob pattern for GWAS/TWAS summary files (e.g. data/sumstats/*.tsv)"
+    },
+    "make_twas_plots": {
+      "type": "boolean",
+      "description": "Generate TWAS Manhattan plots after S-PrediXcan normalization",
+      "default": true
+    },
+    "outdir_model": {
+      "type": "string",
+      "description": "Output directory for model workflow artifacts",
+      "default": "results_model"
+    },
     "model_prefix": {
       "type": "string",
       "description": "Prefix for output model files",
@@ -48,6 +77,6 @@
                   21,22,23,24,25,26,27,28,29]
     }
   },
-  "required": ["gwas_snps", "gtf", "genotype_file", "expression_file", "covariates_file", "snp_annot_file"]
+  "required": ["gwas_snps", "gwas_vcf", "gtf", "genotype_file", "expression_file", "covariates_file", "snp_annot_file"]
 }
 

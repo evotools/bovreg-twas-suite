@@ -1,10 +1,14 @@
 process s_predixcan {
   input:
-    path(weights_db), path(gwas_sumstats)
+    tuple val(trait), path(gwas_sumstats), path(weights_db)
   output:
-    path("s_predixcan_results.txt"), emit: result
+    tuple val(trait), path("s_predixcan_results_${trait}.tsv"), emit: result
   script:
     """
-    python3 scripts/s_predixcan.py --model_db_path $weights_db --gwas_file $gwas_sumstats --output_file s_predixcan_results.txt
+    python3 ${projectDir}/scripts/s_predixcan.py \
+      --model_db_path $weights_db \
+      --gwas_file $gwas_sumstats \
+      --trait $trait \
+      --output_file s_predixcan_results_${trait}.tsv
     """
 }

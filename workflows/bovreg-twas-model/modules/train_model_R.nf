@@ -2,25 +2,23 @@ process train_model_R {
   tag "chr${chrom}"
 
   input:
-    val chrom
-    path r_script
+    tuple val(chrom), path(snp_annot), path(genotype), path(gene_annot), path(expression), path(covariates), val(model_prefix), path(r_script)
 
   output:
-    path("Model_training_chr${chrom}_model_summaries.txt"), emit: model_summary
-    path("Model_training_chr${chrom}_weights.txt"), emit: weights
-    path("Model_training_chr${chrom}_covariances.txt"), emit: covariances
+    path("${model_prefix}_chr${chrom}_model_summaries.txt"), emit: model_summary
+    path("${model_prefix}_chr${chrom}_weights.txt"), emit: weights
+    path("${model_prefix}_chr${chrom}_covariances.txt"), emit: covariances
 
   script:
     """
-    mkdir -p summary weights covariances
     Rscript ${r_script} \\
-      output/snp_annot.chr${chrom}.txt \\
-      output/gene_annot.parsed.txt \\
-      output/genotype.chr${chrom}.txt \\
-      output/transformed_expression.txt \\
-      output/covariates.txt \\
+      $snp_annot \\
+      $gene_annot \\
+      $genotype \\
+      $expression \\
+      $covariates \\
       ${chrom} \\
-      Model_training
+      ${model_prefix}
     """
 }
 
