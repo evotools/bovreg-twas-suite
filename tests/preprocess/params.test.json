@@ -1,0 +1,9 @@
+{
+  "fasta": "/path/to/reference/genome.fa",
+  "gtf": "/path/to/reference/annotation.gtf",
+  "input_sheet": "tests/preprocess/samples.test.tsv",
+  "panel_vcf": "/path/to/reference/panel.vcf.gz",
+  "map_file": "/path/to/reference/genetic_map.txt",
+  "peer_k": 20,
+  "outdir": "results/test-preprocess"
+}

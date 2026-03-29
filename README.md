@@ -98,6 +98,50 @@ nextflow run workflows/bovreg-twas-preprocess -stub-run
 nextflow run workflows/bovreg-twas-model -stub-run
 ```
 
+### Linux cluster testing (SGE + conda)
+
+Test templates are provided in `tests/preprocess/`.
+Update `tests/preprocess/samples.test.tsv` and `tests/preprocess/params.test.json`
+with valid cluster paths before running.
+
+Validate environment and profile resolution:
+
+```bash
+nextflow -version
+nextflow config workflows/bovreg-twas-preprocess -profile sge
+```
+
+Structural (no compute-heavy execution):
+
+```bash
+nextflow run workflows/bovreg-twas-preprocess \
+  -profile sge \
+  -stub-run \
+  -params-file tests/preprocess/params.test.json
+```
+
+Short real test run:
+
+```bash
+nextflow run workflows/bovreg-twas-preprocess \
+  -profile sge \
+  -params-file tests/preprocess/params.test.json \
+  --queue <queue_name> \
+  --max_cpus 8 \
+  --max_memory '32 GB' \
+  --max_time '8.h' \
+  -resume
+```
+
+MultiQC verification checklist:
+
+- Confirm SGE jobs are submitted and completed.
+- Confirm `fastqc` and `star_align` tasks both complete.
+- Confirm `multiqc` runs and publishes:
+  - `results/multiqc/multiqc_report.html`
+- Open the report and verify FastQC and STAR sections are present.
+- Re-run with `-resume` and verify completed tasks are reused.
+
 ---
 
 ## 📁 Folder Structure
