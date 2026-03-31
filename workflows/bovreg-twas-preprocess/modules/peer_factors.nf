@@ -1,8 +1,7 @@
 #!/usr/bin/env nextflow
 process peer_factors {
   input:
-    path(expr)
-    val(n)
+    tuple path(expr),val(n)
   output:
     path("peer_factors.tsv"), emit: factors
   script:
