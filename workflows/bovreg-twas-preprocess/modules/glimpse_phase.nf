@@ -1,10 +1,7 @@
 #!/usr/bin/env nextflow
 process glimpse_phase {
   input:
-    path(chunk)
-    path(vcf)
-    path(ref)
-    path(map)
+    tuple path(chunk),path(vcf),path(ref),path(map)
   output:
     path("*.vcf.gz"), emit: phased
   script:
