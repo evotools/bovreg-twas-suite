@@ -16,7 +16,7 @@ It comprises two independent workflows:
 Clone the repository:
 
 ```bash
-git clone https://github.com/siddharthjayaraman/bovreg-twas-suite.git
+git clone https://github.com/evotools/bovreg-twas-suite.git
 cd bovreg-twas-suite
 ```
 
