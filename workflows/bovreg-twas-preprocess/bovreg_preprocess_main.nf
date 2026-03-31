@@ -39,11 +39,10 @@ workflow preprocess {
     .fromPath(params.map_file, checkIfExists: true)
     .set { map_file_ch }
 
-  peer_k = params.peer_k ?: 20
+  def peer_k = params.peer_k ?: 20
 
   parse_sample_sheet(sample_sheet_ch)
 
-  // Parse sample tuples from parser output into (sample_id, fq1, fq2) for read-based modules.
   sample_reads_ch = parse_sample_sheet.out.parsed
     .splitText()
     .filter { row -> row?.trim() }
@@ -57,56 +56,78 @@ workflow preprocess {
 
   trim_galore(sample_reads_ch)
   trimmed_reads_ch = trim_galore.out
+
   fastqc(trimmed_reads_ch)
 
-  star_index(fasta_ch, gtf_ch)
-  // Join each trimmed read pair with the shared STAR index directory.
-  star_align(trimmed_reads_ch.combine(star_index.out.index).map { sample_id, fq1, fq2, idx ->
-    tuple(sample_id, fq1, fq2, idx)
-  })
+  star_index(
+    fasta_ch.combine(gtf_ch).map { fasta, gtf ->
+      tuple(fasta, gtf)
+    }
+  )
 
-  // Recover sample_id from BAM basename so featureCounts gets (sample_id, bam, gtf).
+  star_align(
+    trimmed_reads_ch.combine(star_index.out.index).map { sample_id, fq1, fq2, idx ->
+      tuple(sample_id, fq1, fq2, idx)
+    }
+  )
+
   bam_with_sample_ch = star_align.out.bam.map { bam ->
     tuple(bam.baseName, bam)
   }
-  featurecounts(bam_with_sample_ch.combine(gtf_ch).map { sample_id, bam, gtf ->
-    tuple(sample_id, bam, gtf)
-  })
+
+  featurecounts(
+    bam_with_sample_ch.combine(gtf_ch).map { bam_tuple, gtf ->
+      tuple(bam_tuple[0], bam_tuple[1], gtf)
+    }
+  )
 
   kallisto_index(fasta_ch)
-  // Join each trimmed read pair with the shared kallisto transcript index.
-  kallisto_quant(trimmed_reads_ch.combine(kallisto_index.out.index).map { sample_id, fq1, fq2, idx ->
-    tuple(sample_id, fq1, fq2, idx)
-  })
+
+  kallisto_quant(
+    trimmed_reads_ch.combine(kallisto_index.out.index).map { sample_id, fq1, fq2, idx ->
+      tuple(sample_id, fq1, fq2, idx)
+    }
+  )
 
   quantile_norm(featurecounts.out.counts)
-  peer_factors(quantile_norm.out.norm, peer_k)
 
-  mpileup_gls(star_align.out.bam.combine(fasta_ch).map { bam, fasta ->
-    tuple(bam, fasta)
-  })
+  peer_factors(
+    quantile_norm.out.norm.map { expr ->
+      tuple(expr, peer_k)
+    }
+  )
+
+  mpileup_gls(
+    star_align.out.bam.combine(fasta_ch).map { bam, fasta ->
+      tuple(bam, fasta)
+    }
+  )
 
   prepare_reference(panel_vcf_ch)
-  // Keep reference and map together so GLIMPSE steps consume a stable (ref, map) pair.
+
   ref_map_ch = prepare_reference.out.ref.combine(map_file_ch).map { ref, map ->
     tuple(ref, map)
   }
 
-  // Build GLIMPSE chunk inputs as (sample_vcf, reference_vcf, genetic_map).
-  glimpse_chunk(mpileup_gls.out.bcf.combine(ref_map_ch).map { vcf, ref_map ->
-    tuple(vcf, ref_map[0], ref_map[1])
-  })
+  glimpse_chunk(
+    mpileup_gls.out.bcf.combine(ref_map_ch).map { vcf, ref_map ->
+      tuple(vcf, ref_map[0], ref_map[1])
+    }
+  )
 
-  // Create phase inputs as (chunk_file, sample_vcf, reference_vcf, genetic_map).
   phase_seed_ch = glimpse_chunk.out.chunks.combine(mpileup_gls.out.bcf).map { chunk, vcf ->
     tuple(chunk, vcf)
   }
-  glimpse_phase(phase_seed_ch.combine(ref_map_ch).map { chunk_vcf, ref_map ->
-    tuple(chunk_vcf[0], chunk_vcf[1], ref_map[0], ref_map[1])
-  })
+
+  glimpse_phase(
+    phase_seed_ch.map { chunk_vcf -> chunk_vcf[0] },
+    phase_seed_ch.map { chunk_vcf -> chunk_vcf[1] },
+    prepare_reference.out.ref,
+    map_file_ch
+  )
+
   glimpse_ligate(glimpse_phase.out.phased.collect())
 
-  // Aggregate per-sample FastQC zips + STAR final logs into one MultiQC run.
   qc_artifacts_ch = fastqc.out.zip.flatten().mix(star_align.out.star_logs).collect()
   multiqc(qc_artifacts_ch)
 }
