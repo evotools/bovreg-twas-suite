@@ -1,7 +1,9 @@
 #!/usr/bin/env nextflow
 process glimpse_chunk {
   input:
-    path(vcf), path(ref), path(map)
+    path(vcf)
+    path(ref)
+    path(map)
   output:
     path("chunks.txt"), emit: chunks
   script:
