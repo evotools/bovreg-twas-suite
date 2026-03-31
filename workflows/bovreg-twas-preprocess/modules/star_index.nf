@@ -1,7 +1,6 @@
 process star_index {
   input:
-    path(fasta)
-    path(gtf)
+    tuple path(fasta),path(gtf)
   output:
     path("star_index"), emit: index  // no trailing slash
   script:
