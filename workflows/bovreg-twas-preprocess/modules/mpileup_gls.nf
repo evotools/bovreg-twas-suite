@@ -1,7 +1,8 @@
 #!/usr/bin/env nextflow
 process mpileup_gls {
   input:
-    path(bam), path(fasta)
+    path(bam)
+    path(fasta)
   output:
     path("gls.bcf"), emit: bcf
   script:
