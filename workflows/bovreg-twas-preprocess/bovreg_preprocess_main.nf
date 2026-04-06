@@ -8,6 +8,7 @@ include { multiqc } from './modules/multiqc.nf'
 include { star_index } from './modules/star_index.nf'
 include { star_align } from './modules/star_align.nf'
 include { featurecounts } from './modules/featurecounts.nf'
+include { merge_featurecounts } from './modules/merge_featurecounts.nf'
 include { kallisto_index } from './modules/kallisto_index.nf'
 include { kallisto_quant } from './modules/kallisto_quant.nf'
 include { quantile_norm } from './modules/quantile_norm.nf'
@@ -19,6 +20,7 @@ include { glimpse_ligate } from './modules/glimpse_ligate.nf'
 include { peer_factors } from './modules/peer_factors.nf'
 
 workflow preprocess {
+
   Channel
     .fromPath(params.input_sheet, checkIfExists: true)
     .set { sample_sheet_ch }
@@ -60,74 +62,102 @@ workflow preprocess {
   fastqc(trimmed_reads_ch)
 
   star_index(
-    fasta_ch.combine(gtf_ch).map { fasta, gtf ->
-      tuple(fasta, gtf)
-    }
+    fasta_ch
+      .combine(gtf_ch)
+      .map { row ->
+        tuple(row[0], row[1])
+      }
   )
 
   star_align(
-    trimmed_reads_ch.combine(star_index.out.index).map { sample_id, fq1, fq2, idx ->
-      tuple(sample_id, fq1, fq2, idx)
-    }
+    trimmed_reads_ch
+      .combine(star_index.out.index)
+      .map { row ->
+        tuple(row[0], row[1], row[2], row[3])
+      }
   )
 
-  bam_with_sample_ch = star_align.out.bam.map { bam ->
-    tuple(bam.baseName, bam)
-  }
+  bam_with_sample_ch = star_align.out.bam
 
-  featurecounts(
-    bam_with_sample_ch.combine(gtf_ch).map { bam_tuple, gtf ->
-      tuple(bam_tuple[0], bam_tuple[1], gtf)
+  featurecounts_input_ch = bam_with_sample_ch
+    .combine(gtf_ch)
+    .map { sample_id, bam, gtf ->
+      tuple(sample_id, bam, gtf)
     }
+
+  featurecounts(featurecounts_input_ch)
+
+  merge_featurecounts(
+    featurecounts.out.counts
+      .map { row -> row[1] }
+      .collect()
   )
 
   kallisto_index(fasta_ch)
 
   kallisto_quant(
-    trimmed_reads_ch.combine(kallisto_index.out.index).map { sample_id, fq1, fq2, idx ->
-      tuple(sample_id, fq1, fq2, idx)
-    }
+    trimmed_reads_ch
+      .combine(kallisto_index.out.index)
+      .map { row ->
+        tuple(row[0], row[1], row[2], row[3])
+      }
   )
 
-  quantile_norm(featurecounts.out.counts)
+  quantile_norm(merge_featurecounts.out.matrix)
 
   peer_factors(
-    quantile_norm.out.norm.map { expr ->
-      tuple(expr, peer_k)
-    }
+    quantile_norm.out.norm
+      .map { expr ->
+        tuple(expr, peer_k)
+      }
   )
 
-  mpileup_gls(
-    star_align.out.bam.combine(fasta_ch).map { bam, fasta ->
-      tuple(bam, fasta)
+  mpileup_input_ch = bam_with_sample_ch
+    .combine(fasta_ch)
+    .map { row ->
+      tuple(row[0], row[1], row[2])
     }
-  )
+
+  mpileup_gls(mpileup_input_ch)
 
   prepare_reference(panel_vcf_ch)
 
-  ref_map_ch = prepare_reference.out.ref.combine(map_file_ch).map { ref, map ->
-    tuple(ref, map)
+  glimpse_chunk_input_ch = mpileup_gls.out.bcf
+    .map { sample_id, gl_bcf ->
+      tuple(sample_id, gl_bcf)
   }
 
-  glimpse_chunk(
-    mpileup_gls.out.bcf.combine(ref_map_ch).map { vcf, ref_map ->
-      tuple(vcf, ref_map[0], ref_map[1])
-    }
-  )
+  glimpse_chunk(glimpse_chunk_input_ch)
 
-  phase_seed_ch = glimpse_chunk.out.chunks.combine(mpileup_gls.out.bcf).map { chunk, vcf ->
-    tuple(chunk, vcf)
+  glimpse_phase_input_ch = glimpse_chunk.out.chunks
+    .join(mpileup_gls.out.bcf)
+    .combine(prepare_reference.out.ref)
+    .combine(map_file_ch)
+    .map { sample_id, chunk_file, gl_bcf, ref_file, ref_index, map_file ->
+      tuple(sample_id, chunk_file, gl_bcf, ref_file, ref_index, map_file)
   }
 
-  glimpse_phase(
-    phase_seed_ch.map { chunk_vcf -> chunk_vcf[0] },
-    phase_seed_ch.map { chunk_vcf -> chunk_vcf[1] },
-    prepare_reference.out.ref,
-    map_file_ch
-  )
+  glimpse_phase(glimpse_phase_input_ch)
 
-  glimpse_ligate(glimpse_phase.out.phased.collect())
+  phased_grouped_ch = glimpse_phase.out.phased
+    .groupTuple()
 
-  qc_artifacts_ch = fastqc.out.zip.flatten().mix(star_align.out.star_logs).collect()
+  glimpse_ligate(phased_grouped_ch)
+  
+  star_log_files_ch = star_align.out.star_logs
+    .map { row -> row[1] }
+
+  fastqc_zip_files_ch = fastqc.out.zip
+    .map { row -> row[1] }
+    .flatten()
+
+  qc_artifacts_ch = fastqc_zip_files_ch
+    .mix(star_log_files_ch)
+    .collect()
+
   multiqc(qc_artifacts_ch)
+}
+
+workflow {
+  preprocess()
 }

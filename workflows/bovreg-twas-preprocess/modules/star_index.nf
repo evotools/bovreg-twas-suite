@@ -1,16 +1,22 @@
+#!/usr/bin/env nextflow
+
 process star_index {
   input:
-    tuple path(fasta),path(gtf)
+    tuple path(fasta), path(gtf)
+
   output:
-    path("star_index"), emit: index  // no trailing slash
+    path("star_index"), emit: index
+
   script:
     """
     mkdir -p star_index
-    STAR --runThreadN 4 --runMode genomeGenerate \
-         --genomeDir star_index \
-         --genomeFastaFiles $fasta \
-         --sjdbGTFfile $gtf \
-         --sjdbOverhang 100
+
+    STAR \
+      --runThreadN ${task.cpus} \
+      --runMode genomeGenerate \
+      --genomeDir star_index \
+      --genomeFastaFiles ${fasta} \
+      --sjdbGTFfile ${gtf} \
+      --sjdbOverhang 100
     """
 }
-

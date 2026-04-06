@@ -1,8 +1,8 @@
-name: bovreg-glimpse
+name: bovreg-hts
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - glimpse-bio=1.1.1
   - bcftools
+  - samtools
   - htslib

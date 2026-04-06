@@ -1,0 +1,7 @@
+name: bovreg-r-peer
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base
+  - r-peer

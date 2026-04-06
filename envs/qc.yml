@@ -1,8 +1,8 @@
-name: qc
+name: bovreg-qc
 channels:
   - conda-forge
   - bioconda
-  - defaults
 dependencies:
+  - trim-galore
   - fastqc
   - multiqc

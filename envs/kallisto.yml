@@ -1,0 +1,6 @@
+name: bovreg-kallisto
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - kallisto

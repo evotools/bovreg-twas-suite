@@ -1,0 +1,13 @@
+# Nextflow
+.nextflow/
+work/
+results/
+.nextflow.log*
+
+# Python
+__pycache__/
+*.pyc
+
+# Conda
+.conda/
+.env/

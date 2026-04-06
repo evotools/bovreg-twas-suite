@@ -1,0 +1,6 @@
+name: bovreg-python
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11

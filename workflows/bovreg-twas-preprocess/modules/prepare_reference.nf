@@ -1,12 +1,19 @@
 #!/usr/bin/env nextflow
+
 process prepare_reference {
   input:
     path(panel_vcf)
+
   output:
-    path("reference.vcf.gz"), emit: ref
+    tuple path("reference.bcf"), path("reference.bcf.csi"), emit: ref
+
   script:
     """
-    bcftools norm -m -any -Oz -o reference.vcf.gz $panel_vcf
-    tabix -p vcf reference.vcf.gz
+    cp ${panel_vcf} reference.bcf
+    if [ -f ${panel_vcf}.csi ]; then
+      cp ${panel_vcf}.csi reference.bcf.csi
+    else
+      bcftools index -f reference.bcf
+    fi
     """
 }

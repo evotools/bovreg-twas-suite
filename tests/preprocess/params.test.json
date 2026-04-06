@@ -1,9 +1,9 @@
 {
-  "fasta": "/path/to/reference/genome.fa",
-  "gtf": "/path/to/reference/annotation.gtf",
+  "fasta": "/exports/cmvm/eddie/eb/groups/jprende3_rzhao4_isp_pump_priming_2025/TWAS_test/data/Bos_taurus.ARS-UCD2.0.dna_sm.toplevel.fa",
+  "gtf": "/exports/cmvm/eddie/eb/groups/jprende3_rzhao4_isp_pump_priming_2025/TWAS_test/data/Bos_taurus.ARS-UCD2.0.115.gtf",
   "input_sheet": "tests/preprocess/samples.test.tsv",
-  "panel_vcf": "/path/to/reference/panel.vcf.gz",
-  "map_file": "/path/to/reference/genetic_map.txt",
+  "panel_vcf": "/exports/cmvm/eddie/eb/groups/jprende3_rzhao4_isp_pump_priming_2025/TWAS_test/data/Cattle_R4_JAMES_NoJessIDs.phased.chr_1.bcf",
+  "map_file": "/exports/cmvm/eddie/eb/groups/jprende3_rzhao4_isp_pump_priming_2025/TWAS_test/data/Cattle_R4_JAMES_NoJessIDs.chr_1.map",
   "peer_k": 20,
   "outdir": "results/test-preprocess"
 }

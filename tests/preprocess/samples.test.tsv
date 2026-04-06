@@ -1,3 +1,2 @@
 sample_id	run_acc	fastq_1	fastq_2
-sampleA	SRR000001	/path/to/test_data/sampleA_R1.fastq.gz	/path/to/test_data/sampleA_R2.fastq.gz
-sampleB	SRR000002	/path/to/test_data/sampleB_R1.fastq.gz	/path/to/test_data/sampleB_R2.fastq.gz
+ERR4314106	SRR000001	/exports/cmvm/eddie/eb/groups/jprende3_rzhao4_isp_pump_priming_2025/TWAS_test/data/ERR4314106_1.fastq.gz	/exports/cmvm/eddie/eb/groups/jprende3_rzhao4_isp_pump_priming_2025/TWAS_test/data/ERR4314106_2.fastq.gz
