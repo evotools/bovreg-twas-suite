@@ -22,7 +22,7 @@ cd bovreg-twas-suite
 
 Ensure you have:
 - [Nextflow](https://www.nextflow.io/) v22.10.0 or higher
-- Either: Conda, Docker, or Singularity
+- Anaconda
 - Reference genome files, annotation, and optionally a GWAS SNP list
 
 ---
@@ -40,18 +40,18 @@ Runs:
 #### Run example:
 ```bash
 nextflow run workflows/bovreg-twas-preprocess \
-  --fasta cattle.fa \
-  --gtf annotation.gtf \
-  --input_sheet samples.tsv \
-  --panel_vcf reference_panel.vcf.gz \
-  --map_file genetic_map.txt \
-  -profile conda
+  -profile conda,sge \
+  -params-file tests/preprocess/params.test.json \
+  --max_cpus 10 \
+  --max_time '48.h' \
+  --sge_penv <cluster-defined parallel environment name> \
+  -resume
 ```
 
 > Use `-stub-run` to validate structure.
 
 Expected QC output:
-- `results/multiqc/multiqc_report.html`
+- `results/test-preprocess/multiqc/multiqc_report.html`
 
 ---
 
