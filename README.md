@@ -44,7 +44,7 @@ nextflow run workflows/bovreg-twas-preprocess \
   -params-file tests/preprocess/params.test.json \
   --max_cpus 10 \
   --max_time '48.h' \
-  --sge_penv <cluster-defined parallel environment name> \
+  --sge_penv sharedmem \
   -resume
 ```
 
